@@ -13,7 +13,6 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  */
-
 package org.ros.internal.message;
 
 import com.google.common.collect.Lists;
@@ -29,154 +28,192 @@ import org.ros.message.MessageDeclaration;
 import org.ros.message.MessageFactory;
 import org.ros.message.MessageIdentifier;
 
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
+import org.kohsuke.args4j.Option;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.ListIterator;
+import org.kohsuke.args4j.spi.StringArrayOptionHandler;
 
 /**
  * @author damonkohler@google.com (Damon Kohler)
  */
 public class GenerateInterfaces {
 
-  private final TopicDefinitionFileProvider topicDefinitionFileProvider;
-  private final ServiceDefinitionFileProvider serviceDefinitionFileProvider;
-  private final MessageDefinitionProviderChain messageDefinitionProviderChain;
-  private final MessageFactory messageFactory;
-  static private final String ROS_PACKAGE_PATH = "ROS_PACKAGE_PATH";
+    private final TopicDefinitionFileProvider topicDefinitionFileProvider = new TopicDefinitionFileProvider();
+    private final ServiceDefinitionFileProvider serviceDefinitionFileProvider = new ServiceDefinitionFileProvider();
+    private final MessageDefinitionProviderChain messageDefinitionProviderChain = new MessageDefinitionProviderChain();
+    private final MessageFactory messageFactory;
 
-  public GenerateInterfaces() {
-    messageDefinitionProviderChain = new MessageDefinitionProviderChain();
-    topicDefinitionFileProvider = new TopicDefinitionFileProvider();
-    messageDefinitionProviderChain.addMessageDefinitionProvider(topicDefinitionFileProvider);
-    serviceDefinitionFileProvider = new ServiceDefinitionFileProvider();
-    messageDefinitionProviderChain.addMessageDefinitionProvider(serviceDefinitionFileProvider);
-    messageFactory = new DefaultMessageFactory(messageDefinitionProviderChain);
-  }
+    static private final String ROS_PACKAGE_PATH = "ROS_PACKAGE_PATH";
 
-  /**
-   * @param packages
-   *          a list of packages containing the topic types to generate
-   *          interfaces for
-   * @param outputDirectory
-   *          the directory to write the generated interfaces to
-   * @throws IOException
-   */
-  private void writeTopicInterfaces(File outputDirectory, Collection<String> packages)
-      throws IOException {
-    Collection<MessageIdentifier> topicTypes = Sets.newHashSet();
-    if (packages.size() == 0) {
-      packages = topicDefinitionFileProvider.getPackages();
-    }
-    for (String pkg : packages) {
-      Collection<MessageIdentifier> messageIdentifiers =
-          topicDefinitionFileProvider.getMessageIdentifiersByPackage(pkg);
-      if (messageIdentifiers != null) {
-        topicTypes.addAll(messageIdentifiers);
-      }
-    }
-    for (MessageIdentifier topicType : topicTypes) {
-      String definition = messageDefinitionProviderChain.get(topicType.getType());
-      MessageDeclaration messageDeclaration = new MessageDeclaration(topicType, definition);
-      writeInterface(messageDeclaration, outputDirectory, true);
-    }
-  }
+    @Option(name = "-p", aliases = {"--package-path"}, metaVar = "PATH",
+            usage = "path to packages, default is env(" + ROS_PACKAGE_PATH + ")")
+    private String packagePath = System.getenv(ROS_PACKAGE_PATH);
+    @Option(name = "-o", aliases = {"--output-path"}, metaVar = "DIRECTORY", usage = "output path, default is .")
+    private File outputPath = new File(".");
+    @Option(name = "-n", aliases = {"--package-names"}, handler = StringArrayOptionHandler.class,  
+            usage = "names of the packages")
+    private String[] packageNames;
+    @Option(name = "--help", usage = "show help output")
+    private boolean help = false;
 
-  /**
-   * @param packages
-   *          a list of packages containing the topic types to generate
-   *          interfaces for
-   * @param outputDirectory
-   *          the directory to write the generated interfaces to
-   * @throws IOException
-   */
-  private void writeServiceInterfaces(File outputDirectory, Collection<String> packages)
-      throws IOException {
-    Collection<MessageIdentifier> serviceTypes = Sets.newHashSet();
-    if (packages.size() == 0) {
-      packages = serviceDefinitionFileProvider.getPackages();
-    }
-    for (String pkg : packages) {
-      Collection<MessageIdentifier> messageIdentifiers =
-          serviceDefinitionFileProvider.getMessageIdentifiersByPackage(pkg);
-      if (messageIdentifiers != null) {
-        serviceTypes.addAll(messageIdentifiers);
-      }
-    }
-    for (MessageIdentifier serviceType : serviceTypes) {
-      String definition = messageDefinitionProviderChain.get(serviceType.getType());
-      MessageDeclaration serviceDeclaration =
-          MessageDeclaration.of(serviceType.getType(), definition);
-      writeInterface(serviceDeclaration, outputDirectory, false);
-      List<String> requestAndResponse = MessageDefinitionTupleParser.parse(definition, 2);
-      MessageDeclaration requestDeclaration =
-          MessageDeclaration.of(serviceType.getType() + "Request", requestAndResponse.get(0));
-      MessageDeclaration responseDeclaration =
-          MessageDeclaration.of(serviceType.getType() + "Response", requestAndResponse.get(1));
-      writeInterface(requestDeclaration, outputDirectory, true);
-      writeInterface(responseDeclaration, outputDirectory, true);
-    }
-  }
+    public GenerateInterfaces(String[] args) {
 
-  private void writeInterface(MessageDeclaration messageDeclaration, File outputDirectory,
-      boolean addConstantsAndMethods) {
-    MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
-    builder.setPackageName(messageDeclaration.getPackage());
-    builder.setInterfaceName(messageDeclaration.getName());
-    builder.setMessageDeclaration(messageDeclaration);
-    builder.setAddConstantsAndMethods(addConstantsAndMethods);
-    try {
-      String content;
-      content = builder.build(messageFactory);
-      File file = new File(outputDirectory, messageDeclaration.getType() + ".java");
-      FileUtils.writeStringToFile(file, content);
-    } catch (Exception e) {
-      System.out.printf("Failed to generate interface for %s.\n", messageDeclaration.getType());
-      e.printStackTrace();
-    }
-  }
+        messageDefinitionProviderChain.addMessageDefinitionProvider(topicDefinitionFileProvider);
+        messageDefinitionProviderChain.addMessageDefinitionProvider(serviceDefinitionFileProvider);
+        messageFactory = new DefaultMessageFactory(messageDefinitionProviderChain);
 
-  public void generate(File outputDirectory, Collection<String> packages,
-      Collection<File> packagePath) {
-    for (File directory : packagePath) {
-      topicDefinitionFileProvider.addDirectory(directory);
-      serviceDefinitionFileProvider.addDirectory(directory);
-    }
-    topicDefinitionFileProvider.update();
-    serviceDefinitionFileProvider.update();
-    try {
-      writeTopicInterfaces(outputDirectory, packages);
-      writeServiceInterfaces(outputDirectory, packages);
-    } catch (IOException e) {
-      throw new RosMessageRuntimeException(e);
-    }
-  }
+        CmdLineParser parser = new CmdLineParser(this);
 
-  public static void main(String[] args) {
-    List<String> arguments = Lists.newArrayList(args);
-    if (arguments.size() == 0) {
-      arguments.add(".");
+        try {
+            parser.setUsageWidth(80);
+            parser.parseArgument(args);
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            System.out.println("GenerateInterfaces [options...] arguments...");
+            parser.printUsage(System.err);
+            System.err.println();
+            return;
+        }
+
+        if (help) {
+            System.out.println("GenerateInterfaces [options...] arguments...");
+            parser.printUsage(System.out);
+            System.out.println();
+            return;
+        }
+
+        Collection<File> packagePaths = Lists.newArrayList();
+        for (String path : packagePath.split(File.pathSeparator)) {
+            File packageDirectory = new File(path);
+            if (packageDirectory.exists()) {
+                packagePaths.add(packageDirectory);
+            }
+        }
+        
+        List<String> arguments = Lists.newArrayList(packageNames);
+        this.generate(outputPath, arguments, packagePaths);
+
     }
-    String rosPackagePath = System.getenv(ROS_PACKAGE_PATH);
-    // Overwrite with a supplied package path if specified (--package-path=)
-    for (ListIterator<String> iter = arguments.listIterator(); iter.hasNext(); ) {
-      String arg = iter.next();
-      if (arg.contains("--package-path=")) {
-        rosPackagePath = arg.replace("--package-path=", "");
-        iter.remove();
-        break;
-      }
+
+    /**
+     * @param packages a list of packages containing the topic types to generate interfaces for
+     * @param outputDirectory the directory to write the generated interfaces to
+     * @throws IOException
+     */
+    private void writeTopicInterfaces(File outputDirectory, Collection<String> packages)
+            throws IOException {
+        Collection<MessageIdentifier> topicTypes = Sets.newHashSet();
+
+        if (packages.isEmpty()) {
+            packages = topicDefinitionFileProvider.getPackages();
+            System.out.println("no pkg given, generate all");
+        }
+        for (String pkg : packages) {
+            Collection<MessageIdentifier> messageIdentifiers
+                    = topicDefinitionFileProvider.getMessageIdentifiersByPackage(pkg);
+            if (messageIdentifiers != null) {
+                topicTypes.addAll(messageIdentifiers);
+            } 
+        }
+        for (MessageIdentifier topicType : topicTypes) {
+            String definition = messageDefinitionProviderChain.get(topicType.getType());
+            MessageDeclaration messageDeclaration = new MessageDeclaration(topicType, definition);
+            writeInterface(messageDeclaration, outputDirectory, true);
+        }
     }
-    Collection<File> packagePath = Lists.newArrayList();
-    for (String path : rosPackagePath.split(File.pathSeparator)) {
-      File packageDirectory = new File(path);
-      if (packageDirectory.exists()) {
-        packagePath.add(packageDirectory);
-      }
+
+    /**
+     * @param packages a list of packages containing the topic types to generate interfaces for
+     * @param outputDirectory the directory to write the generated interfaces to
+     * @throws IOException
+     */
+    private void writeServiceInterfaces(File outputDirectory, Collection<String> packages)
+            throws IOException {
+        Collection<MessageIdentifier> serviceTypes = Sets.newHashSet();
+        if (packages.isEmpty()) {
+            packages = serviceDefinitionFileProvider.getPackages();
+        }
+        for (String pkg : packages) {
+            Collection<MessageIdentifier> messageIdentifiers
+                    = serviceDefinitionFileProvider.getMessageIdentifiersByPackage(pkg);
+            if (messageIdentifiers != null) {
+                serviceTypes.addAll(messageIdentifiers);
+            } 
+        }
+        for (MessageIdentifier serviceType : serviceTypes) {
+            String definition = messageDefinitionProviderChain.get(serviceType.getType());
+            MessageDeclaration serviceDeclaration
+                    = MessageDeclaration.of(serviceType.getType(), definition);
+            writeInterface(serviceDeclaration, outputDirectory, false);
+            List<String> requestAndResponse = MessageDefinitionTupleParser.parse(definition, 2);
+            MessageDeclaration requestDeclaration
+                    = MessageDeclaration.of(serviceType.getType() + "Request", requestAndResponse.get(0));
+            MessageDeclaration responseDeclaration
+                    = MessageDeclaration.of(serviceType.getType() + "Response", requestAndResponse.get(1));
+            writeInterface(requestDeclaration, outputDirectory, true);
+            writeInterface(responseDeclaration, outputDirectory, true);
+        }
     }
-    GenerateInterfaces generateInterfaces = new GenerateInterfaces();
-    File outputDirectory = new File(arguments.remove(0));
-    generateInterfaces.generate(outputDirectory, arguments, packagePath);
-  }
+
+    private void writeInterface(MessageDeclaration messageDeclaration, File outputDirectory,
+            boolean addConstantsAndMethods) {
+        MessageInterfaceBuilder builder = new MessageInterfaceBuilder();
+        builder.setPackageName(messageDeclaration.getPackage());
+        builder.setInterfaceName(messageDeclaration.getName());
+        builder.setMessageDeclaration(messageDeclaration);
+        builder.setAddConstantsAndMethods(addConstantsAndMethods);
+        try {
+            String content;
+            content = builder.build(messageFactory);
+            File file = new File(outputDirectory, messageDeclaration.getType() + ".java");
+            FileUtils.writeStringToFile(file, content);
+            System.out.println("Generate Interface for " + messageDeclaration.getType());
+        } catch (Exception e) {
+            System.out.printf("Failed to generate interface for %s.\n", messageDeclaration.getType());
+            e.printStackTrace();
+        }
+    }
+
+    private void generate(File outputDirectory, Collection<String> packages, Collection<File> packagePath) {
+        for (File directory : packagePath) {
+            topicDefinitionFileProvider.addDirectory(directory);
+            serviceDefinitionFileProvider.addDirectory(directory);
+        }
+
+        if (packages.size() == 1 && packagePath.size() == 1) {
+            String pkg = (String) packages.toArray()[0];
+            File pkgp = (File) packagePath.toArray()[0];
+            System.out.println("single pkg generate, force pkg to " + pkg + " , with path:" + pkgp.getPath());
+            topicDefinitionFileProvider.updateOnePKG(pkg);
+            serviceDefinitionFileProvider.updateOnePKG(pkg);
+
+        } else {
+            topicDefinitionFileProvider.update();
+            serviceDefinitionFileProvider.update();
+        }
+        
+        for(String pkg : packages) {
+            boolean empty = topicDefinitionFileProvider.getMessageIdentifiersByPackage(pkg).isEmpty();
+            empty &= serviceDefinitionFileProvider.getMessageIdentifiersByPackage(pkg).isEmpty();
+            if(empty) System.err.println("No Interfaces found for pkg: " + pkg);
+        }
+
+        try {
+            writeTopicInterfaces(outputDirectory, packages);
+            writeServiceInterfaces(outputDirectory, packages);
+        } catch (IOException e) {
+            throw new RosMessageRuntimeException(e);
+        }
+    }
+
+    public static void main(String[] args) {
+
+        GenerateInterfaces generateInterfaces = new GenerateInterfaces(args);
+    }
 }

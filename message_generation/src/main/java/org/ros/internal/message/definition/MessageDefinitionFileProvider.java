@@ -25,8 +25,10 @@ import org.ros.message.MessageDefinitionProvider;
 import org.ros.message.MessageIdentifier;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -63,7 +65,7 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
   private void addDefinition(File file, String definition) {
     MessageIdentifier topicType = fileToMessageIdentifier(file);
     if (definitions.containsKey(topicType.getType())) {
-      // First definition wins.
+      System.err.println("multiple defs");
       return;
     }
     definitions.put(topicType.getType(), definition);
@@ -72,18 +74,41 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
     }
     messageIdentifiers.get(topicType.getPackage()).add(topicType);
   }
+  
+  private void addDefinition(File file, String definition, String fixedPkg) {
+    MessageIdentifier topicType = fileToMessageIdentifier(file);
+    topicType.setPackage(fixedPkg);
+    if (definitions.containsKey(topicType.getType())) {
+      System.err.println("multiple defs");
+      return;
+    }
+    definitions.put(topicType.getType(), definition);
+    if (!messageIdentifiers.containsKey(fixedPkg)) {
+      messageIdentifiers.put(fixedPkg, new HashSet<MessageIdentifier>());
+    }
+    messageIdentifiers.get(fixedPkg).add(topicType);
+  }
 
   /**
    * Updates the topic definition cache.
    * 
    * @see StringFileProvider#update()
    */
-  public void update() {
-    stringFileProvider.update();
-    for (Entry<File, String> entry : stringFileProvider.getStrings().entrySet()) {
-      addDefinition(entry.getKey(), entry.getValue());
+    public void update() {
+        stringFileProvider.update();
+        for (Entry<File, String> entry : stringFileProvider.getStrings().entrySet()) {
+            //System.out.println("have definition: " + entry.getKey() + " : " + entry.getValue());
+            addDefinition(entry.getKey(), entry.getValue());
+        }
     }
-  }
+
+    public void updateOnePKG(String pkgname) {
+        stringFileProvider.update();
+        for (Entry<File, String> entry : stringFileProvider.getStrings().entrySet()) {
+            // System.out.println("have definition: " + entry.getKey() + " : " + entry.getValue());
+            addDefinition(entry.getKey(), entry.getValue(), pkgname);
+        }
+    }
 
   /**
    * @see StringFileProvider#addDirectory(File)
@@ -99,7 +124,7 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
 
   @Override
   public Collection<MessageIdentifier> getMessageIdentifiersByPackage(String pkg) {
-    return messageIdentifiers.get(pkg);
+    return messageIdentifiers.getOrDefault(pkg, new ArrayList<MessageIdentifier>());
   }
 
   @Override

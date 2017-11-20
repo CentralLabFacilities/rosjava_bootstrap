@@ -74,6 +74,11 @@ public class MessageIdentifier {
     pkg = packageAndName[0];
     name = packageAndName[1];
   }
+  
+  
+  public void setPackage(String pkg) {
+      this.pkg = pkg;
+  }
 
   public String getPackage() {
     if (pkg == null) {

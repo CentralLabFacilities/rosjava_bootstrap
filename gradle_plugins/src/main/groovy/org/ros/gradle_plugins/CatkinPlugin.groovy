@@ -58,17 +58,21 @@ class CatkinPlugin implements Plugin<Project> {
         }
 	    setTasks()
     }
-    def void setTasks() {
-        project.task('catkinPackageInfo') << {
-            println("CatkinPlugin is happy, you should be too.")
-            println("Catkin Workspaces........." + project.catkin.workspaces)
-            println("Catkin Packages")
-            project.catkin.packages.each { pkg ->
-                print pkg.value.toString()
-            }
-        }
-    }
+
+  def void setTasks() {
+      project.task('catkinPackageInfo') << {
+          println("CatkinPlugin is happy, you should be too.")
+          println("Catkin Workspaces........." + project.catkin.workspaces)
+          println("Catkin Packages")
+          project.catkin.packages.each { pkg ->
+              print pkg.value.toString()
+          }
+      }
+  }
+  
 }
+
+
 class CatkinPluginExtension {
   CatkinPackage pkg
   List<String> workspaces
@@ -90,8 +94,7 @@ class CatkinPackages {
   void generate() {
     if (pkgs.size() == 0) {
       workspaces.each { workspace ->
-        def manifestTree = project.fileTree(dir: workspace,
-                                            include: "**/package.xml")
+        def manifestTree = project.fileTree(dir: workspace, include: "**/package.xml")
         manifestTree.each { file -> 
           def pkg = new CatkinPackage(project, file)
           if(this.pkgs.containsKey(pkg.name)) {
@@ -146,7 +149,7 @@ class CatkinPackages {
     generateSourcesTask.description = "Generate sources for " + pkg.name
     generateSourcesTask.outputs.dir(project.file(generatedSourcesDir))
     /* generateSourcesTask.args = new ArrayList<String>([generatedSourcesDir, pkg.name]) */
-    generateSourcesTask.args = new ArrayList<String>([generatedSourcesDir, '--package-path=' + pkg.directory, pkg.name])
+    generateSourcesTask.args = new ArrayList<String>(['--output-path', generatedSourcesDir, '--package-path', pkg.directory, '--package-names', pkg.name])
     generateSourcesTask.classpath = project.configurations.runtime
     generateSourcesTask.main = "org.ros.internal.message.GenerateInterfaces"
     project.tasks.compileJava.source generateSourcesTask.outputs.files
