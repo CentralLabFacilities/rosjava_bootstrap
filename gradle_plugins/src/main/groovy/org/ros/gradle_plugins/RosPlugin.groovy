@@ -45,9 +45,6 @@ class RosPlugin implements Plugin<Project> {
        * This will often be the same as ROS_MAVEN_REPOSITORY, but this way it lets a user
        * provide a repository of their own via the environment variable and use this as a fallback.
        */
-      maven {
-        url "https://github.com/rosjava/rosjava_mvn_repo/raw/master"
-      }
       mavenLocal()
       maven {
         url "http://repository.springsource.com/maven/bundles/release"
@@ -56,6 +53,7 @@ class RosPlugin implements Plugin<Project> {
         url "http://repository.springsource.com/maven/bundles/external"
       }
       jcenter()
+      mavenCentral()
     }
   }
 }
