@@ -452,9 +452,21 @@ class MessageImpl implements RawMessage, GetInstance {
 
   @Override
   public String toString() {
-    return String.format("MessageImpl<%s>", getType());
-  }
 
+    StringBuilder builder = new StringBuilder();
+
+    builder.append(getType() + "[");
+    boolean first = true;
+    for (Field field : messageFields.getFields()) {
+      if(!first) builder.append(", ");
+      builder.append(field.getName()+":"+field.getValue()+"");
+      first = false;
+    }
+    builder.append("]");
+    return builder.toString();
+    //return String.format("MessageImpl<%s>", getType());
+  }
+  
   @Override
   public int hashCode() {
     final int prime = 31;

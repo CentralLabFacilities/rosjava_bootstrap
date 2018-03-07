@@ -101,6 +101,19 @@ public class MessageTest {
   }
 
   @Test
+  public void testToString() {
+    topicDefinitionResourceProvider.add("foo/foo", "bar[] data");
+    topicDefinitionResourceProvider.add("foo/bar", "int8 data");
+    RawMessage fooMessage = messageFactory.newFromType("foo/foo");
+    RawMessage barMessage = messageFactory.newFromType("foo/bar");
+    fooMessage.setMessageList("data", Lists.<Message>newArrayList(barMessage));
+    byte data = 42;
+    barMessage.toRawMessage().setInt8("data", data);
+
+    assertEquals(fooMessage.toString(),"foo/foo[data:[foo/bar[data:42]]]");
+  }
+
+  @Test
   public void testConstantInt8() {
     topicDefinitionResourceProvider.add("foo/foo", "int8 data=42");
     RawMessage rawMessage = messageFactory.newFromType("foo/foo");
