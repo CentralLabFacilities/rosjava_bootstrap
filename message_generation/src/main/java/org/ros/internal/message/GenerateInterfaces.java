@@ -59,6 +59,9 @@ public class GenerateInterfaces {
     @Option(name = "-n", aliases = {"--package-names"}, handler = StringArrayOptionHandler.class,  
             usage = "names of the packages")
     private String[] packageNames;
+    @Option(name = "-s", aliases = {"--sources"}, metaVar = "PATH",
+            usage = "source folder on single pkg gen")
+    private String sourcesPath;
     @Option(name = "--help", usage = "show help output")
     private boolean help = false;
 
@@ -95,9 +98,17 @@ public class GenerateInterfaces {
                 packagePaths.add(packageDirectory);
             }
         }
+
+        Collection<File> sourcePaths = Lists.newArrayList();
+        for (String path : sourcesPath.split(File.pathSeparator)) {
+            File packageDirectory = new File(path);
+            if (packageDirectory.exists()) {
+                sourcePaths.add(packageDirectory);
+            }
+        }
         
         List<String> arguments = Lists.newArrayList(packageNames);
-        this.generate(outputPath, arguments, packagePaths);
+        this.generate(outputPath, arguments, packagePaths, sourcePaths);
 
     }
 
@@ -180,8 +191,13 @@ public class GenerateInterfaces {
         }
     }
 
-    private void generate(File outputDirectory, Collection<String> packages, Collection<File> packagePath) {
+    private void generate(File outputDirectory, Collection<String> packages, Collection<File> packagePath, Collection<File> sourcesPath) {
         for (File directory : packagePath) {
+            topicDefinitionFileProvider.addDirectory(directory);
+            serviceDefinitionFileProvider.addDirectory(directory);
+        }
+
+        for (File directory : sourcesPath) {
             topicDefinitionFileProvider.addDirectory(directory);
             serviceDefinitionFileProvider.addDirectory(directory);
         }
