@@ -60,7 +60,7 @@ class CatkinPlugin implements Plugin<Project> {
     }
 
   def void setTasks() {
-      project.task('catkinPackageInfo') << {
+      project.task('catkinPackageInfo').doLast {
           println("CatkinPlugin is happy, you should be too.")
           println("Catkin Workspaces........." + project.catkin.workspaces)
           println("Catkin Packages")
