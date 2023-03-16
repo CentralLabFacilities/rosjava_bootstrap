@@ -217,7 +217,10 @@ public class GenerateInterfaces {
         for(String pkg : packages) {
             boolean empty = topicDefinitionFileProvider.getMessageIdentifiersByPackage(pkg).isEmpty();
             empty &= serviceDefinitionFileProvider.getMessageIdentifiersByPackage(pkg).isEmpty();
-            if(empty) System.err.println("No Interfaces found for pkg: " + pkg);
+            if(empty) {
+                System.err.println("No Interfaces found for pkg: " + pkg);
+                //serviceDefinitionFileProvider.addDirectory();
+            }
         }
 
         try {
@@ -229,7 +232,7 @@ public class GenerateInterfaces {
     }
 
     public static void main(String[] args) {
-
+	System.out.println("Generate Interfaces v2");
         GenerateInterfaces generateInterfaces = new GenerateInterfaces(args);
     }
 }

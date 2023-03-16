@@ -80,6 +80,7 @@ public class StringFileProvider {
     }
 
     public void update(File directory) {
+      System.out.println("  update dir: " + directory);
       try {
         walk(directory, null);
       } catch (IOException e) {

@@ -42,7 +42,7 @@ public class TopicDefinitionFileProvider extends MessageDefinitionFileProvider {
       }
     });
     IOFileFilter fileFilter = FileFilterUtils.andFileFilter(extensionFilter, parentBaseNameFilter);
-    return new StringFileProvider(fileFilter);
+    return new StringFileProvider(extensionFilter);
   }
 
   public TopicDefinitionFileProvider() {

@@ -42,7 +42,7 @@ public class ServiceDefinitionFileProvider extends MessageDefinitionFileProvider
       }
     });
     IOFileFilter fileFilter = FileFilterUtils.andFileFilter(extensionFilter, parentBaseNameFilter);
-    return new StringFileProvider(fileFilter);
+    return new StringFileProvider(extensionFilter);
   }
 
   public ServiceDefinitionFileProvider() {

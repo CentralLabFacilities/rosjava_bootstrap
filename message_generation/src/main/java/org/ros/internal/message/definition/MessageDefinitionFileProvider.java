@@ -97,15 +97,16 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
     public void update() {
         stringFileProvider.update();
         for (Entry<File, String> entry : stringFileProvider.getStrings().entrySet()) {
-            //System.out.println("have definition: " + entry.getKey() + " : " + entry.getValue());
+            //System.out.println("have definition: " + entry.getKey() + " : /n" + entry.getValue());
             addDefinition(entry.getKey(), entry.getValue());
         }
     }
 
     public void updateOnePKG(String pkgname) {
+        System.out.println("Update one pkg " + pkgname);
         stringFileProvider.update();
         for (Entry<File, String> entry : stringFileProvider.getStrings().entrySet()) {
-            // System.out.println("have definition: " + entry.getKey() + " : " + entry.getValue());
+            //System.out.println("have definition: " + entry.getKey() + " : /n" + entry.getValue());
             addDefinition(entry.getKey(), entry.getValue(), pkgname);
         }
     }
@@ -114,6 +115,7 @@ public class MessageDefinitionFileProvider implements MessageDefinitionProvider 
    * @see StringFileProvider#addDirectory(File)
    */
   public void addDirectory(File directory) {
+    System.out.println("add dir " + directory);
     stringFileProvider.addDirectory(directory);
   }
 
