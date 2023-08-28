@@ -23,22 +23,21 @@ allprojects {
 
 subprojects {
   apply plugin: 'java'
-  apply plugin: 'maven'
   apply plugin: 'maven-publish'
   apply plugin: "idea"
   apply plugin: "eclipse"
 
-  sourceCompatibility = 1.6
-  targetCompatibility = 1.6
+  sourceCompatibility = 11
+  targetCompatibility = 11
 
   // These external repositories are copied from bootstrap.gradle.
   repositories {
     jcenter()
     maven {
-      url "http://repository.springsource.com/maven/bundles/release"
+      url "https://repository.springsource.com/maven/bundles/release"
     }
     maven {
-      url "http://repository.springsource.com/maven/bundles/external"
+      url "https://repository.springsource.com/maven/bundles/external"
     }
   }
 

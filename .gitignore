@@ -8,3 +8,4 @@ bin
 .idea
 local.properties
 /.nb-gradle/
+.vscode
