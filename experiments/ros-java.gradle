@@ -52,12 +52,6 @@
 /***********************
  * Plugins
  ***********************/
-if (!plugins.findPlugin('maven')) {
-  apply(plugin: 'maven')
-}
-if (!plugins.findPlugin('java')) {
-  apply(plugin: 'java')
-}
 if (!plugins.findPlugin('maven-publish')) {
   apply(plugin: 'maven-publish')
 }
