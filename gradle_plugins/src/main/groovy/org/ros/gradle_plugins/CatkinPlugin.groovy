@@ -133,15 +133,15 @@ class CatkinPackages {
     def pkg = this.pkgs[package_name]
     project.version = pkg.version
     /* println("Artifact: " + pkg.name + "-" + pkg.version) */
-    project.dependencies.add("compile", 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)')
+    project.dependencies.add("implementation", 'org.ros.rosjava_bootstrap:message_generation:[0.3,0.4)')
     Set<String> messageDependencies = pkg.getMessageDependencies()
     messageDependencies.each { d ->
       if ( project.getParent().getChildProjects().containsKey(d) ) {
         /* println("  Internal: " + d) */
-        project.dependencies.add("compile", project.dependencies.project(path: ':' + d))
+        project.dependencies.add("implementation", project.dependencies.project(path: ':' + d))
       } else {
         /* println("  External: " + d) */
-        project.dependencies.add("compile", 'org.ros.rosjava_messages:' + d + ':[0.0,)')
+        project.dependencies.add("implementation", 'org.ros.rosjava_messages:' + d + ':[0.0,)')
       }
     }
     def generatedSourcesDir = "${project.buildDir}/generated-src"
