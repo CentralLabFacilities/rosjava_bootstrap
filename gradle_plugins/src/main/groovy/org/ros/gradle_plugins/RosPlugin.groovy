@@ -47,10 +47,10 @@ class RosPlugin implements Plugin<Project> {
        */
       mavenLocal()
       maven {
-        url "http://repository.springsource.com/maven/bundles/release"
+        url "https://repository.springsource.com/maven/bundles/release"
       }
       maven {
-        url "http://repository.springsource.com/maven/bundles/external"
+        url "https://repository.springsource.com/maven/bundles/external"
       }
       jcenter()
       mavenCentral()
