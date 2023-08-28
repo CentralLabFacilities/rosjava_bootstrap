@@ -150,7 +150,7 @@ class CatkinPackages {
     generateSourcesTask.outputs.dir(project.file(generatedSourcesDir))
     /* generateSourcesTask.args = new ArrayList<String>([generatedSourcesDir, pkg.name]) */
     generateSourcesTask.args = new ArrayList<String>(['--output-path', generatedSourcesDir, '--package-path', pkg.directory, '--package-names', pkg.name])
-    generateSourcesTask.classpath = project.configurations.runtime
+    generateSourcesTask.classpath = project.configurations.runtimeClasspath
     generateSourcesTask.main = "org.ros.internal.message.GenerateInterfaces"
     project.tasks.compileJava.source generateSourcesTask.outputs.files
   }
