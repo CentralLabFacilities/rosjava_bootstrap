@@ -18,7 +18,7 @@ import org.gradle.api.publish.maven.MavenPublication;
 class RosPlugin implements Plugin<Project> {
 
   def void apply(Project project) {
-    project.apply plugin: "maven"
+    project.apply plugin: "maven-publish"
 
     project.extensions.create("ros", RosPluginExtension)
 
