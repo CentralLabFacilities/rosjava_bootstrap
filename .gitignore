@@ -9,3 +9,4 @@ bin
 local.properties
 /.nb-gradle/
 .vscode
+out/

@@ -11,7 +11,7 @@ project(rosjava_bootstrap)
 
 find_package(catkin REQUIRED rosjava_build_tools)
 
-catkin_rosjava_setup(publish install)
+catkin_rosjava_setup(publish publishToMavenLocal)
 
 catkin_package()
 
