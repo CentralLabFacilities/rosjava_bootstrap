@@ -62,4 +62,4 @@ subprojects {
   }
 }
 
-defaultTasks 'publish', 'install'
+defaultTasks 'publish', 'publishToMavenLocal'
