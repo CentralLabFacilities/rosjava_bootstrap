@@ -32,7 +32,7 @@ subprojects {
 
   // These external repositories are copied from bootstrap.gradle.
   repositories {
-    jcenter()
+    mavenCentral()
     maven {
       url "http://repository.springsource.com/maven/bundles/release"
       allowInsecureProtocol = true
