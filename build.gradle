@@ -30,17 +30,8 @@ subprojects {
   sourceCompatibility = 11
   targetCompatibility = 11
 
-  // These external repositories are copied from bootstrap.gradle.
   repositories {
     mavenCentral()
-    maven {
-      url "http://repository.springsource.com/maven/bundles/release"
-      allowInsecureProtocol = true
-    }
-    maven {
-      url "http://repository.springsource.com/maven/bundles/external"
-      allowInsecureProtocol = true
-    }
   }
 
   // Configuration of the deployment repository is copied from the RosPlugin.
