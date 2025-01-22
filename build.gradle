@@ -32,6 +32,9 @@ subprojects {
 
   repositories {
     mavenCentral()
+    maven {
+      url "https://repo.spring.io/libs-milestone/"
+    }
   }
 
   // Configuration of the deployment repository is copied from the RosPlugin.
