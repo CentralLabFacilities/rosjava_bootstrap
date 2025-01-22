@@ -33,7 +33,8 @@ subprojects {
   repositories {
     mavenCentral()
     maven {
-      url "https://repo.spring.io/libs-milestone/"
+      url "https://camunda.jfrog.io/artifactory/springsource-external-bundle-releases-cache/"
+      allowInsecureProtocol = true
     }
   }
 
