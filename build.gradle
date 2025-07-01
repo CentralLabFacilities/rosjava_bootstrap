@@ -32,10 +32,6 @@ subprojects {
 
   repositories {
     mavenCentral()
-    maven {
-      url "https://camunda.jfrog.io/artifactory/springsource-external-bundle-releases-cache/"
-      allowInsecureProtocol = true
-    }
   }
 
   // Configuration of the deployment repository is copied from the RosPlugin.
@@ -53,6 +49,12 @@ subprojects {
            url 'file://' + mavenDeploymentRepository
         }
       }
+    }
+    repositories {
+        mavenCentral()
+        maven {
+           url 'file://' + mavenDeploymentRepository
+        }
     }
   } else {
     logger.warn("ROS_MAVEN_DEPLOYMENT_REPOSITORY is not set. Have you sourced setup.bash?")

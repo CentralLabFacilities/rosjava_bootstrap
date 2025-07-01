@@ -46,14 +46,7 @@ class RosPlugin implements Plugin<Project> {
        * provide a repository of their own via the environment variable and use this as a fallback.
        */
       mavenLocal()
-      maven {
-        url "http://repository.springsource.com/maven/bundles/release"
-        allowInsecureProtocol = true
-      }
-      maven {
-        url "http://repository.springsource.com/maven/bundles/external"
-        allowInsecureProtocol = true
-      }
+      
       jcenter()
       mavenCentral()
     }
