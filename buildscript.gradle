@@ -34,6 +34,18 @@ rootProject.buildscript {
             }
         }
         mavenCentral()
+        maven {
+            // This registry only contains the org/apache/commons/* dependencies
+            url "https://gitlab.ub.uni-bielefeld.de/api/v4/projects/840/packages/maven"
+            name "GitLab"
+            credentials(HttpHeaderCredentials) {
+                name = 'read_maven_open'
+                value = "gldt-J9JAGbyxzuqFsE8sQx1D" // your welcome
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
     }
     dependencies {
         classpath "org.ros.rosjava_bootstrap:gradle_plugins:[0.3,0.4)"
