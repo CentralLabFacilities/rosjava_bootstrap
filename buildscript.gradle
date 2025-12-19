@@ -40,7 +40,7 @@ rootProject.buildscript {
             name "GitLab"
             credentials(HttpHeaderCredentials) {
                 name = 'read_maven_open'
-                value = "gldt-J9JAGbyxzuqFsE8sQx1D" // your welcome
+                value = "gldt-DQsrFbxjtz9hn-yY1oJE" // your welcome
             }
             authentication {
                 header(HttpHeaderAuthentication)
