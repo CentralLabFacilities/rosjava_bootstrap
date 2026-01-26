@@ -57,6 +57,18 @@ subprojects {
         maven {
            url 'file://' + mavenDeploymentRepository
         }
+        maven {
+            // This registry only contains the org/apache/commons/* dependencies
+            url "https://gitlab.ub.uni-bielefeld.de/api/v4/projects/840/packages/maven"
+            name "GitLab"
+            credentials(HttpHeaderCredentials) {
+                name = 'read_maven_open'
+                value = "gldt-DQsrFbxjtz9hn-yY1oJE" // your welcome
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
+            }
+        }
     }
   } else {
     logger.warn("ROS_MAVEN_DEPLOYMENT_REPOSITORY is not set. Have you sourced setup.bash?")
